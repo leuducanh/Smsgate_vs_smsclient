@@ -66,6 +66,46 @@ public class ByteBuffer {
         }
     }
 
+    public ByteBuffer readBytes(int numberOfReadBytes) throws NotEnoughByteInByteBufferException {
+        ByteBuffer byteBuffer = new ByteBuffer();
+
+        if(buffer.length < numberOfReadBytes) {
+            throw new NotEnoughByteInByteBufferException(buffer.length, numberOfReadBytes);
+        } else {
+            byte[] bytes = new byte[numberOfReadBytes];
+            System.arraycopy(buffer, 0,bytes, 0, numberOfReadBytes);
+            byteBuffer.appendBytesDirectlyToBuffer(bytes, numberOfReadBytes);
+        }
+        return byteBuffer;
+    }
+
+    public ByteBuffer removeBytes(int numberOfRemovedBytes) throws NotEnoughByteInByteBufferException {
+        ByteBuffer byteBuffer = readBytes(numberOfRemovedBytes);
+        removeByteDirectlyFromBuffer(numberOfRemovedBytes);
+        return byteBuffer;
+    }
+
+    public void appendInt(int number) {
+        byte[] bytes = new byte[SZ_INT];
+
+        bytes[3] = (byte) (number & 0xff);
+        number >>= 4;
+        bytes[2] = (byte) (number & 0xff);
+        number >>= 4;
+        bytes[1] = (byte) (number & 0xff);
+        number >>= 4;
+        bytes[0] = (byte) (number & 0xff);
+        appendBytesDirectlyToBuffer(bytes, SZ_INT);
+    }
+
+    public void appendShort(short number) {
+        byte[] bytes = new byte[SZ_INT];
+
+        bytes[1] = (byte) (number & 0xff);
+        number >>= 4;
+        bytes[0] = (byte) (number & 0xff);
+        appendBytesDirectlyToBuffer(bytes, SZ_SHORT);
+    }
 
     public int readInt() throws NotEnoughByteInByteBufferException {
         int len = length();
@@ -184,6 +224,8 @@ public class ByteBuffer {
         int c = (bs[0] & 0xff);
         System.out.println(Integer.toBinaryString(a));
         System.out.println(Integer.toBinaryString(a & 0xff));
+        int g = 2147483647;
+         Short.MAX_VALUE
 //        System.out.println(a);
 //        System.out.println(Integer.toBinaryString(a));
 //        System.out.println(Integer.toBinaryString(a & BIT_MASK_11111111));

@@ -12,8 +12,12 @@ public abstract class ByteData {
     public ByteData() {
     }
 
-    public abstract void setData() throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException;
+    public abstract void setData(ByteBuffer buffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException;
 
     public abstract ByteBuffer getData();
 
+    public short encodeUnsignedInt(int numberInPositive) {
+
+        return 1;
+    }
 }

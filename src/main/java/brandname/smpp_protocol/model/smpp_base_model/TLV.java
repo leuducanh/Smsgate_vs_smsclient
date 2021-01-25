@@ -5,14 +5,31 @@ import brandname.smpp_protocol.exceptions.PDUException;
 import brandname.smpp_protocol.exceptions.TerminatingZeroNotFoundException;
 import brandname.smpp_protocol.model.ByteBuffer;
 
-public class TLV extends ByteData{
-    @Override
-    public void setData() throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException {
+public abstract class TLV extends ByteData{
 
+    private short tag = 0;
+
+    public TLV(short tag) {
+        super();
+        this.tag = tag;
+    }
+
+    @Override
+    public void setData(ByteBuffer byteBuffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException {
+        tag = byteBuffer.removeShort();
+        int length = byteBuffer.removeShort();
+        setDataValuePart(byteBuffer.removeBytes(length));
     }
 
     @Override
     public ByteBuffer getData() {
+
+        ByteBuffer byteBuffer = new ByteBuffer();
+        byteBuffer.appendShort(tag);
+//        byteBuffer.appendShort();
         return null;
     }
+
+    public abstract void setDataValuePart(ByteBuffer byteBuffer);
+
 }

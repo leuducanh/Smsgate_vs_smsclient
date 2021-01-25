@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PDU extends ByteData {
+public abstract class PDU extends ByteData {
 
 
     public static final byte VALID_NONE = 0;
@@ -21,14 +21,15 @@ public class PDU extends ByteData {
 
     private PDUHeader header = null;
 
-    private LinkedList<>
+    private LinkedList<TLV> defaultTLV;
 
     @Override
-    public void setData() throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException {
+    public void setData(ByteBuffer byteBuffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException {
+
     }
 
     @Override
     public ByteBuffer getData() {
-        return ;
+        return null;
     }
 }
