@@ -44,6 +44,18 @@ public class ByteBuffer {
         }
     }
 
+    public void appendByteBufferToThis(ByteBuffer byteBuffer) throws NotEnoughByteInByteBufferException {
+        if(byteBuffer == null) {
+            throw new NotEnoughByteInByteBufferException(0, 1);
+        }
+    }
+
+
+
+    public byte[] getItsBuffer() {
+        return buffer;
+    }
+
     public void appendBytesDirectlyToBuffer(byte[] bytes, int count) {
         int len = length();
         byte[] newBuffer = new byte[len + count];
@@ -243,5 +255,9 @@ public class ByteBuffer {
         int a1 = Short.MAX_VALUE - s;
 
         System.out.println(a1);
+
+
+        System.out.println(Short.MAX_VALUE - Short.MIN_VALUE);
+        System.out.println(65536);
     }
 }

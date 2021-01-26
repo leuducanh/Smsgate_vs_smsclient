@@ -26,10 +26,13 @@ public abstract class TLV extends ByteData{
 
         ByteBuffer byteBuffer = new ByteBuffer();
         byteBuffer.appendShort(tag);
-//        byteBuffer.appendShort();
+        byteBuffer.appendShort(encodeUnsignedInt(getDataPartLength()));
+        byteBuffer.appendBytesDirectlyToBuffer();
         return null;
     }
 
     public abstract void setDataValuePart(ByteBuffer byteBuffer);
+    public abstract ByteBuffer getDataPart();
+    public abstract int getDataPartLength();
 
 }
