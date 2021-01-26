@@ -217,15 +217,15 @@ public class ByteBuffer {
 
 
     public static void main(String[] args) {
-        int BIT_MASK_11111111 = 0xff;
-        byte a = -101;
-        byte[] bs = new byte[1];
-        bs[0] = 2;
-        int c = (bs[0] & 0xff);
-        System.out.println(Integer.toBinaryString(a));
-        System.out.println(Integer.toBinaryString(a & 0xff));
-        int g = 2147483647;
-         Short.MAX_VALUE
+//        int BIT_MASK_11111111 = 0xff;
+//        byte a = -101;
+//        byte[] bs = new byte[1];
+//        bs[0] = 2;
+//        int c = (bs[0] & 0xff);
+//        System.out.println(Integer.toBinaryString(a));
+//        System.out.println(Integer.toBinaryString(a & 0xff));
+//        int g = 2147483647;
+//         Short.MAX_VALUE
 //        System.out.println(a);
 //        System.out.println(Integer.toBinaryString(a));
 //        System.out.println(Integer.toBinaryString(a & BIT_MASK_11111111));
@@ -234,5 +234,14 @@ public class ByteBuffer {
 //        System.out.println(Integer.toBinaryString(a >>> 24 & BIT_MASK_11111111));
 //        int b = a >>> 4 & BIT_MASK_11111111;
 //        System.out.println(Integer.toBinaryString(b));
+
+
+        int a = Short.MAX_VALUE + 100;
+        System.out.println(a);
+        short s = (short) (Short.MAX_VALUE - a);
+
+        int a1 = Short.MAX_VALUE - s;
+
+        System.out.println(a1);
     }
 }
