@@ -7,6 +7,8 @@ import brandname.smpp_protocol.exceptions.PDUException;
 import brandname.smpp_protocol.exceptions.TerminatingZeroNotFoundException;
 import brandname.smpp_protocol.model.ByteBuffer;
 
+import java.io.UnsupportedEncodingException;
+
 public abstract class ByteData {
 
     private static double MAX_POSITIVE_NUMBER_A_SHORT_CAN_CONTAIN = Math.pow(2,16);
@@ -15,7 +17,7 @@ public abstract class ByteData {
     public ByteData() {
     }
 
-    public abstract void setData(ByteBuffer buffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException, InvalidPDUException;
+    public abstract void setData(ByteBuffer buffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException, InvalidPDUException, UnsupportedEncodingException;
 
     public abstract ByteBuffer getData() throws NotEnoughByteInByteBufferException;
 

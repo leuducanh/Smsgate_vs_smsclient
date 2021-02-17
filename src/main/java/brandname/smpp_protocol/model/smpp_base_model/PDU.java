@@ -5,12 +5,14 @@ import brandname.smpp_protocol.model.ByteBuffer;
 import brandname.smpp_protocol.model.smpp_base_model.tlv_concrete_model.TLVOctets;
 import brandname.smpp_protocol.model.util.Constants;
 
+import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class PDU extends ByteData {
 
-    private static AtomicInteger sequenceNumberGlobal = new AtomicInteger(0);
+    private static int sequenceNumberGlobal = 0;
+    private int sequence = -1;
 
     public static final byte VALID_NONE = 0;
     public static final byte VALID_HEADER = 1;
@@ -19,11 +21,13 @@ public abstract class PDU extends ByteData {
 
     public byte state = -1;
 
-    private LinkedList<TLV> defaultTlvOfThisPdu = new LinkedList<>();
+    protected LinkedList<TLV> defaultTlvOfThisPdu = new LinkedList<>();
 
     private LinkedList<TLV> tLVListForUnknownTag = new LinkedList<>();
 
     private PDUHeader pduHeader;
+
+    private boolean sequenceBeAssigned = false;
 
     public PDU() {
         super();
@@ -31,6 +35,7 @@ public abstract class PDU extends ByteData {
 
     public PDU(int commandId) {
         checkHeader();
+        setCommandId(commandId);
     }
 
     public void setCommandId(int commandId) {
@@ -43,9 +48,10 @@ public abstract class PDU extends ByteData {
             pduHeader = new PDUHeader();
         }
         this.pduHeader.setData(headerByteBuffer);
+        sequenceBeAssigned = true;
     }
 
-    protected abstract void setBody(ByteBuffer byteBuffer);
+    protected abstract void setBody(ByteBuffer byteBuffer) throws TerminatingZeroNotFoundException, NotEnoughByteInByteBufferException, ValidateException, UnsupportedEncodingException, PDUException, InvalidPDUException;
 
     private void checkHeader() {
         if (pduHeader == null) {
@@ -53,9 +59,30 @@ public abstract class PDU extends ByteData {
         }
     }
 
+    private void assignSequence(int newSequence) {
+        this.sequence = newSequence;
+    }
+
+    protected void assignSequenceWithNextSequence() {
+        if (!sequenceBeAssigned) {
+            assignSequence(generateSequence());
+            sequenceBeAssigned = true;
+        }
+    }
+
     private void setState(byte state) {
         this.state = state;
     }
+
+    private Integer generateSequence() {
+        return ++sequenceNumberGlobal | 0xFFFFFFFF;
+    }
+
+//    public static void main(String[] args) {
+//        int a = Integer.MAX_VALUE;
+//        System.out.println(Integer.toBinaryString(a+1));
+//        System.out.println((a+1) & 0x7FFFFFFF);
+//    }
 
     @Override
     public void setData(ByteBuffer byteBuffer) throws PDUException, InvalidPDUException {
@@ -74,18 +101,18 @@ public abstract class PDU extends ByteData {
 
             setState(VALID_HEADER);
 
-            if (pduHeader.getCommandLength() - Constants.PDU_HEADER_SIZE < byteBuffer.length()) {
-                // not enough data
-            }
-
             setBody(byteBuffer);
+
+            setState(VALID_HEADER_AND_BODY);
 
             if (totalByteLength - byteBuffer.length() < pduHeader.getCommandLength()) {
                 int extraTLVLength = pduHeader.getCommandLength()
                         - (totalByteLength - byteBuffer.length());
                 setOptionalTLV(byteBuffer.removeBytes(extraTLVLength));
             }
-        } catch (NotEnoughByteInByteBufferException | TerminatingZeroNotFoundException e) {
+
+            setState(VALID_HEADER_AND_BODY_AND_OPTIONAL_PARAM);
+        } catch (TerminatingZeroNotFoundException | NotEnoughByteInByteBufferException e) {
             throw new InvalidPDUException(this, e);
         }
 

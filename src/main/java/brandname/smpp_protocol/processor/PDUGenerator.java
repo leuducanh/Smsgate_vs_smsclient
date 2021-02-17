@@ -29,19 +29,24 @@ public class PDUGenerator {
         }
 
         if (byteBuffer.length() < pduHeader.getCommandLength()) {
-            throw new NotEnoughByteInByteBufferException(byteBuffer.length(), pduHeader.getCommandLength());
+            throw new PDUHeaderIncomplete();
         }
 
         int commandId = pduHeader.getCommandId();
         PDU pduCloneFromTemplate = findPDUTemplateAndClone(commandId);
 
+        ByteBuffer pduByteBufferBlock =  byteBuffer.removeBytes(pduHeader.getCommandLength());
         if (pduCloneFromTemplate != null) {
-            pduCloneFromTemplate.setData(byteBuffer);
+            try {
+                pduCloneFromTemplate.setData(pduByteBufferBlock);
+            } catch (InvalidPDUException e) {
+                // không thể bị nếu bị thì bỏ qua do đã cắt đúng số lượng cần trong command length
+            }
         } else {
             throw new UnknownCommandIdException(commandId);
         }
 
-
+        return pduCloneFromTemplate;
     }
 
     private static PDU findPDUTemplateAndClone(int commandId) {

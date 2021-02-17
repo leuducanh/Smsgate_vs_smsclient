@@ -193,7 +193,18 @@ public class ByteBuffer {
         return buffer[0];
     }
 
-    public String removeCString() throws
+
+
+    public String removeCString() throws TerminatingZeroNotFoundException, NotEnoughByteInByteBufferException {
+        try {
+            return removeCStringDirectly();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String removeCStringDirectly() throws
             UnsupportedEncodingException, NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException {
         String cString = null;
         int zeroPos = 0;
@@ -257,8 +268,12 @@ public class ByteBuffer {
     }
 
     // CString: string which have terminating zero.
-    public void appendCString(String cString) throws UnsupportedEncodingException {
-        appendStringDirectlyToBuffer(cString, true, ENC_ASCII);
+    public void appendCString(String cString)  {
+        try {
+            appendStringDirectlyToBuffer(cString, true, ENC_ASCII);
+        } catch (UnsupportedEncodingException e) {
+            // todo: can't be
+        }
     }
 
 
