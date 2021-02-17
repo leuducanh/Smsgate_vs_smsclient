@@ -51,6 +51,23 @@ public class ByteBuffer {
     }
 
 
+    // todo:
+    public ByteBuffer readByteBuffer(int count) throws NotEnoughByteInByteBufferException {
+        if(count > length()) {
+            throw new NotEnoughByteInByteBufferException(length(), count);
+        }
+        ByteBuffer readByteBuffer = new ByteBuffer();
+        byte[] newByteArray = new byte[count];
+        System.arraycopy(buffer,0,newByteArray,0,count);
+        readByteBuffer.appendBytesDirectlyToBuffer(newByteArray,count);
+        return readByteBuffer;
+    }
+
+    public ByteBuffer removeFromByteBuffer(int count) throws NotEnoughByteInByteBufferException {
+        ByteBuffer readByteBuffer = readByteBuffer(count);
+        removeByteDirectlyFromBuffer(count);
+        return readByteBuffer;
+    }
 
     public byte[] getItsBuffer() {
         return buffer;
