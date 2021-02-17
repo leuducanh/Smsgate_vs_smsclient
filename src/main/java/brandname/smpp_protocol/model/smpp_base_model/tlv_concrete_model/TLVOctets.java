@@ -37,7 +37,7 @@ public class TLVOctets extends TLV {
 
     @Override
     public int getValueLength() {
-        return ByteBuffer.SZ_INT;
+        return byteBufferValue.length();
     }
 
     private void setValue(ByteBuffer byteBuffer){

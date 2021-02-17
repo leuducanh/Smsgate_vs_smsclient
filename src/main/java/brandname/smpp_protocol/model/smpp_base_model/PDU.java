@@ -2,14 +2,15 @@ package brandname.smpp_protocol.model.smpp_base_model;
 
 import brandname.smpp_protocol.exceptions.*;
 import brandname.smpp_protocol.model.ByteBuffer;
+import brandname.smpp_protocol.model.smpp_base_model.tlv_concrete_model.TLVOctets;
 import brandname.smpp_protocol.model.util.Constants;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class PDU extends ByteData {
 
+    private static AtomicInteger sequenceNumberGlobal = new AtomicInteger(0);
 
     public static final byte VALID_NONE = 0;
     public static final byte VALID_HEADER = 1;
@@ -18,14 +19,9 @@ public abstract class PDU extends ByteData {
 
     public byte state = -1;
 
-
-    private static AtomicInteger sequenceNumberGlobal = new AtomicInteger(0);
-    private static LinkedList<PDU> pduTemplates = new LinkedList<>();
     private LinkedList<TLV> defaultTlvOfThisPdu = new LinkedList<>();
 
-    private static LinkedList<TLV> defaultTLVs;
-
-    private LinkedList<TLV> extraTLVs;
+    private LinkedList<TLV> tLVListForUnknownTag = new LinkedList<>();
 
     private PDUHeader pduHeader;
 
@@ -42,36 +38,6 @@ public abstract class PDU extends ByteData {
         pduHeader.setCommandId(commandId);
     }
 
-
-
-
-    public static PDU createPDU(ByteBuffer byteBuffer) throws PDUHeaderIncomplete, NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException, UnknownCommandIdException {
-
-
-        ByteBuffer headerByteBuffer = null;
-        PDUHeader pduHeader;
-        try {
-            headerByteBuffer = byteBuffer.readByteBuffer(Constants.PDU_HEADER_SIZE);
-            pduHeader = new PDUHeader();
-            pduHeader.setData(headerByteBuffer);
-        } catch (NotEnoughByteInByteBufferException e) {
-            throw new PDUHeaderIncomplete();
-        }
-
-        if (byteBuffer.length() < pduHeader.getCommandLength()) {
-            throw new NotEnoughByteInByteBufferException(byteBuffer.length(), pduHeader.getCommandLength());
-        }
-
-        int commandId = pduHeader.getCommandId();
-        PDU pdu = selectPDUTemplate(commandId);
-
-        if (pdu != null) {
-            pdu.setData(byteBuffer);
-        } else {
-            throw new UnknownCommandIdException(commandId);
-        }
-    }
-
     private void setHeader(ByteBuffer headerByteBuffer) throws NotEnoughByteInByteBufferException {
         if (this.pduHeader == null) {
             pduHeader = new PDUHeader();
@@ -80,28 +46,6 @@ public abstract class PDU extends ByteData {
     }
 
     protected abstract void setBody(ByteBuffer byteBuffer);
-
-    static {
-
-
-    }
-
-    public static PDU selectPDUTemplate(int commandId) {
-        for (PDU pduTemplate : pduTemplates) {
-            if (pduTemplate.pduHeader.getCommandId() == commandId) {
-                try {
-                    return (PDU) (pduTemplate.getClass().newInstance());
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return null;
-    }
-
 
     private void checkHeader() {
         if (pduHeader == null) {
@@ -114,7 +58,7 @@ public abstract class PDU extends ByteData {
     }
 
     @Override
-    public void setData(ByteBuffer byteBuffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException {
+    public void setData(ByteBuffer byteBuffer) throws PDUException, InvalidPDUException {
         setState(VALID_NONE);
 
         int totalByteLength = byteBuffer.length();
@@ -123,33 +67,65 @@ public abstract class PDU extends ByteData {
 //                    , Constants.PDU_HEADER_SIZE);
             // not enough data
         }
-        ByteBuffer headerByteBuffer = byteBuffer.removeBytes(Constants.PDU_HEADER_SIZE);
+        try {
+            ByteBuffer headerByteBuffer = byteBuffer.removeBytes(Constants.PDU_HEADER_SIZE);
 
-        setHeader(headerByteBuffer);
+            setHeader(headerByteBuffer);
 
-        setState(VALID_HEADER);
+            setState(VALID_HEADER);
 
-        if (pduHeader.getCommandLength() - Constants.PDU_HEADER_SIZE < byteBuffer.length()) {
-            // not enough data
+            if (pduHeader.getCommandLength() - Constants.PDU_HEADER_SIZE < byteBuffer.length()) {
+                // not enough data
+            }
+
+            setBody(byteBuffer);
+
+            if (totalByteLength - byteBuffer.length() < pduHeader.getCommandLength()) {
+                int extraTLVLength = pduHeader.getCommandLength()
+                        - (totalByteLength - byteBuffer.length());
+                setOptionalTLV(byteBuffer.removeBytes(extraTLVLength));
+            }
+        } catch (NotEnoughByteInByteBufferException | TerminatingZeroNotFoundException e) {
+            throw new InvalidPDUException(this, e);
         }
 
-        setBody(byteBuffer);
-
-        if(totalByteLength - byteBuffer.length() < pduHeader.getCommandLength()) {
-            int extraTLVLength = pduHeader.getCommandLength()
-                    - (totalByteLength - byteBuffer.length());
-            setExtraTLV(byteBuffer.removeFromByteBuffer(extraTLVLength));
+        if (totalByteLength - byteBuffer.length() != pduHeader.getCommandLength()) {
+            throw new InvalidPDUException(this, "Difference size parsed");
         }
+    }
+
+    private void setOptionalTLV(ByteBuffer byteBuffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException {
+        short tag;
+        short valueLength;
+
+        while (byteBuffer.length() > 0) {
+            ByteBuffer tlvHeader = byteBuffer.readByteBuffer(Constants.TLV_LENGTH_FIELD_SIZE + Constants.TLV_TAG_FIELD_SIZE);
+            tag = tlvHeader.removeShort();
+            TLV tlv = findInOptionalTLVList(tag);
+
+            if (tlv == null) {
+                TLVOctets tlvOctets = new TLVOctets(tag);
+                tLVListForUnknownTag.add(tlvOctets);
+            }
+            valueLength = tlvHeader.removeShort();
+            ByteBuffer tlvByteBuffer = byteBuffer.removeBytes(Constants.TLV_LENGTH_FIELD_SIZE
+                    + Constants.TLV_TAG_FIELD_SIZE
+                    + valueLength);
+
+            tlv.setData(tlvByteBuffer);
+        }
+
 
     }
 
-    private void setExtraTLV(ByteBuffer byteBuffer) {
-        short tag;
-        short length;
-
-        while(byteBuffer.length() > 0) {
-
+    private TLV findInOptionalTLVList(short tag) {
+        for (TLV tlv : defaultTlvOfThisPdu) {
+            if (tlv.getTag() == tag) {
+                return tlv;
+            }
         }
+
+        return null;
     }
 
     @Override

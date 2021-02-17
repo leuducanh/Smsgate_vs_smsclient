@@ -1,6 +1,7 @@
 package brandname.smpp_protocol.model.smpp_base_model;
 
 
+import brandname.smpp_protocol.exceptions.InvalidPDUException;
 import brandname.smpp_protocol.exceptions.NotEnoughByteInByteBufferException;
 import brandname.smpp_protocol.exceptions.PDUException;
 import brandname.smpp_protocol.exceptions.TerminatingZeroNotFoundException;
@@ -14,7 +15,7 @@ public abstract class ByteData {
     public ByteData() {
     }
 
-    public abstract void setData(ByteBuffer buffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException;
+    public abstract void setData(ByteBuffer buffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException, InvalidPDUException;
 
     public abstract ByteBuffer getData() throws NotEnoughByteInByteBufferException;
 
