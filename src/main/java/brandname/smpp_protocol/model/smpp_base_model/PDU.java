@@ -21,7 +21,12 @@ public abstract class PDU extends ByteData {
 
     private PDUHeader header = null;
 
-    private LinkedList<TLV> defaultTLV;
+    private List<TLV> defaultTLVs;
+    private List<TLV> extendTLVs;
+
+    public PDU() {
+        super();
+    }
 
     @Override
     public void setData(ByteBuffer byteBuffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException {
@@ -30,6 +35,7 @@ public abstract class PDU extends ByteData {
 
     @Override
     public ByteBuffer getData() {
+
         return null;
     }
 }

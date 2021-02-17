@@ -16,15 +16,23 @@ public abstract class ByteData {
 
     public abstract void setData(ByteBuffer buffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException, PDUException;
 
-    public abstract ByteBuffer getData();
+    public abstract ByteBuffer getData() throws NotEnoughByteInByteBufferException;
 
 
+    // encode là biến phần số dương của kiểu to hơn thành số signed cả âm cả dương (dùng bit dấu) của kiểu bé hơn.
+    // decode là biến số signed số của kiểu bé hơn thành phần dương của kiểu to hơn.
+    // ví dụ: số byte ở java là signed nhưng muốn biểu diễn số âm của byte thành dương
+    // tức là vô hiệu hóa bit dấu => phải dùng kiểu to hơn là kiểu short để biểu diễn
+    // khi đó phần âm của byte sẽ biểu diễn thành phần dương của short
+    // điều này khả thi vì: số byte có 8 bit trong đó 1 bit dấu => biểu diễn đc 2^8 số , 2^7 dương và 2^7 âm
+    // số short có 16 bit trong đó 1 bit dấu => biểu diễn đc 2^15 số, 2^15 > 2^7 + 2^7 => biểu diễn đc
 
-    public short encodeUnsignedInt(int numberInPositive) {
+
+    public short encodePositiveIntToSignedShort(int unsignedIntNumber) {
         // max_value cua short  = 2 ^(16-1) -1 ; 16-1 la tru di bit dau xac dinh +/-
         // -1 la tru di so 0.
-        if (numberInPositive <= Short.MAX_VALUE) {
-            return (short) numberInPositive;
+        if (unsignedIntNumber <= Short.MAX_VALUE) {
+            return (short) unsignedIntNumber;
         } else {
             // numberInPositive - MAX_POSITIVE_NUMBER_A_SHORT_CAN_CONTAIN
             // = numberInPositive - (Short.MAX - Short.Min)
@@ -32,23 +40,31 @@ public abstract class ByteData {
             // = (numberInPositive - Short.MAX) + Short.Min
             // = Số dư ra khi overflow  + Short.Min
             // = số bị overflow khi lơn hơn max.
-            return (short) (numberInPositive - MAX_POSITIVE_NUMBER_A_SHORT_CAN_CONTAIN);
+            return (short) (unsignedIntNumber - MAX_POSITIVE_NUMBER_A_SHORT_CAN_CONTAIN);
         }
     }
 
-    public int decodeUnsignedInt(short number) {
-        if(number >= 0) {
-            return number;
+    public int decodeSignedShortToPositiveInt(short signedShortNumber) {
+        if(signedShortNumber >= 0) {
+            return signedShortNumber;
         }else {
-            return (int) ((double)number + MAX_POSITIVE_NUMBER_A_SHORT_CAN_CONTAIN);
+            return (int) ((double)signedShortNumber + MAX_POSITIVE_NUMBER_A_SHORT_CAN_CONTAIN);
         }
     }
 
-    public byte encodeUnsignedShort(short number) {
-        if(number <= Byte.MAX_VALUE) {
-            return (byte) number;
+    public byte encodePositiveShortToSignedByte(short positiveShort) {
+        if(positiveShort <= Byte.MAX_VALUE) {
+            return (byte) positiveShort;
         } else {
-            return (byte) (number - MAX_POSITIVE_NUMBER_A_BYTE_CAN_CONTAIN);
+            return (byte) (positiveShort - MAX_POSITIVE_NUMBER_A_BYTE_CAN_CONTAIN);
+        }
+    }
+
+    public short decodeSignedByteToPositiveShort(byte signedByteNumber) {
+        if(signedByteNumber >= 0) {
+             return signedByteNumber;
+        }else {
+            return (short) (signedByteNumber + MAX_POSITIVE_NUMBER_A_BYTE_CAN_CONTAIN);
         }
     }
 }

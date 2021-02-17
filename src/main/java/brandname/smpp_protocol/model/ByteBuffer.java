@@ -8,15 +8,15 @@ import java.io.UnsupportedEncodingException;
 public class ByteBuffer {
 
 
-    private static final byte SZ_BYTE = 1;
-    private static final byte SZ_SHORT = 2;
-    private static final byte SZ_INT = 4;
+    public static final byte SZ_BYTE = 1;
+    public static final byte SZ_SHORT = 2;
+    public static final byte SZ_INT = 4;
 
     private static final String ENC_ASCII = "ASCII";
 
     private static final int BIT_MASK_11111111 = 0xff;
 
-    private static byte[] buffer;
+    private byte[] buffer;
 
     private static byte[] zero;
 
@@ -28,12 +28,12 @@ public class ByteBuffer {
     public ByteBuffer() {
     }
 
-    public static byte[] getBuffer() {
+    public byte[] getBuffer() {
         return buffer;
     }
 
-    public static void setBuffer(byte[] buffer) {
-        ByteBuffer.buffer = buffer;
+    public void setBuffer(byte[] buffer) {
+        this.buffer = buffer;
     }
 
     public int length() {
@@ -44,13 +44,14 @@ public class ByteBuffer {
         }
     }
 
-    public void appendByteBufferToThis(ByteBuffer byteBuffer) throws NotEnoughByteInByteBufferException {
-        if(byteBuffer == null) {
+    public void appendOtherByteBuffer(ByteBuffer byteBuffer) throws NotEnoughByteInByteBufferException {
+        if (byteBuffer == null || byteBuffer.length() <= 0) {
             throw new NotEnoughByteInByteBufferException(0, 1);
         }
+
+        byte[] appendedBuffer = byteBuffer.getItsBuffer();
+        this.appendBytesDirectlyToBuffer(appendedBuffer, appendedBuffer.length);
     }
-
-
 
     public byte[] getItsBuffer() {
         return buffer;
@@ -63,6 +64,12 @@ public class ByteBuffer {
             System.arraycopy(buffer, 0, newBuffer, 0, len);
         }
         System.arraycopy(bytes, 0, newBuffer, len, count);
+        setBuffer(newBuffer);
+    }
+
+    public void appendByte(byte oneByte) {
+        byte[] appendedBytes = new byte[1];
+        appendBytesDirectlyToBuffer(appendedBytes, 1);
     }
 
     public void removeByteDirectlyFromBuffer(int count) {
@@ -81,11 +88,11 @@ public class ByteBuffer {
     public ByteBuffer readBytes(int numberOfReadBytes) throws NotEnoughByteInByteBufferException {
         ByteBuffer byteBuffer = new ByteBuffer();
 
-        if(buffer.length < numberOfReadBytes) {
+        if (buffer.length < numberOfReadBytes) {
             throw new NotEnoughByteInByteBufferException(buffer.length, numberOfReadBytes);
         } else {
             byte[] bytes = new byte[numberOfReadBytes];
-            System.arraycopy(buffer, 0,bytes, 0, numberOfReadBytes);
+            System.arraycopy(buffer, 0, bytes, 0, numberOfReadBytes);
             byteBuffer.appendBytesDirectlyToBuffer(bytes, numberOfReadBytes);
         }
         return byteBuffer;
@@ -149,16 +156,16 @@ public class ByteBuffer {
         String cString = null;
         int zeroPos = 0;
         int len = length();
-        if(len < 0) {
+        if (len < 0) {
             throw new NotEnoughByteInByteBufferException(len, 1);
         }
-        while(zeroPos > len || buffer[zeroPos] == 0) {
-            zeroPos ++;
+        while (zeroPos > len || buffer[zeroPos] == 0) {
+            zeroPos++;
         }
 
-        if(zeroPos < len) {
+        if (zeroPos < len) {
             byte[] cStringInByteArray = new byte[zeroPos - 1];
-            System.arraycopy(buffer, 0,cStringInByteArray,0, zeroPos - 1);
+            System.arraycopy(buffer, 0, cStringInByteArray, 0, zeroPos - 1);
             cString = new String(cStringInByteArray, ENC_ASCII);
         } else {
             throw new TerminatingZeroNotFoundException();
@@ -167,20 +174,24 @@ public class ByteBuffer {
         return cString;
     }
 
+    public byte readByte() {
+        return buffer[0];
+    }
+
     public String removeCString() throws UnsupportedEncodingException, NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException {
         String cString = null;
         int zeroPos = 0;
         int len = length();
-        if(len < 0) {
+        if (len < 0) {
             throw new NotEnoughByteInByteBufferException(len, 1);
         }
-        while(zeroPos > len || buffer[zeroPos] == 0) {
-            zeroPos ++;
+        while (zeroPos > len || buffer[zeroPos] == 0) {
+            zeroPos++;
         }
 
-        if(zeroPos < len) {
+        if (zeroPos < len) {
             byte[] cStringInByteArray = new byte[zeroPos - 1];
-            System.arraycopy(buffer, 0,cStringInByteArray,0, zeroPos - 1);
+            System.arraycopy(buffer, 0, cStringInByteArray, 0, zeroPos - 1);
             cString = new String(cStringInByteArray, ENC_ASCII);
         } else {
             throw new TerminatingZeroNotFoundException();
@@ -202,21 +213,27 @@ public class ByteBuffer {
         return number;
     }
 
+    public byte removeByte() throws NotEnoughByteInByteBufferException {
+        byte byteRead = readByte();
+        removeByteDirectlyFromBuffer(1);
+        return byteRead;
+    }
+
     public void appendStringDirectlyToBuffer(String str, boolean terminatingWithZero, String encodingType) throws UnsupportedEncodingException {
 
         if (str != null || !str.isEmpty()) {
             byte[] strInBytes;
-            if(encodingType != null || encodingType.isEmpty()) {
+            if (encodingType != null || encodingType.isEmpty()) {
                 strInBytes = str.getBytes();
             } else {
                 strInBytes = str.getBytes(encodingType);
             }
 
-            if(strInBytes != null && strInBytes.length > 0) {
+            if (strInBytes != null && strInBytes.length > 0) {
                 appendBytesDirectlyToBuffer(strInBytes, strInBytes.length);
             }
 
-            if(terminatingWithZero) {
+            if (terminatingWithZero) {
                 appendBytesDirectlyToBuffer(zero, 1);
             }
         }

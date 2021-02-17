@@ -6,6 +6,10 @@ public class PDUException  extends SmppException{
     private transient PDU pdu;
 
 
+    public PDUException() {
+        super();
+    }
+
     public PDUException(PDU pdu) {
         super();
         this.pdu = pdu;
