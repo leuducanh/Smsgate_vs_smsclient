@@ -36,4 +36,23 @@ public abstract class BindRequest extends Request {
         address.setData(byteBuffer);
     }
 
+    public String getSystemId() {
+        return systemId;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getSystemType() {
+        return systemType;
+    }
+
+    public int getInterfaceVersion() {
+        return interfaceVersion;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
 }
