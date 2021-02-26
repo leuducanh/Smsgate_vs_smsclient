@@ -1,4 +1,4 @@
-package brandname.smpp_protocol.model.smpp_base_model.pdu_concrete_model;
+package brandname.smpp_protocol.model.smpp_base_model.pdu_concrete_model.pdu_for_communication;
 
 import brandname.smpp_protocol.exceptions.NotEnoughByteInByteBufferException;
 import brandname.smpp_protocol.exceptions.TerminatingZeroNotFoundException;

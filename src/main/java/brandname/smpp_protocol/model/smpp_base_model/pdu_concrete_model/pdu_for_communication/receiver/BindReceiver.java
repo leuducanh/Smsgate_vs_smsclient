@@ -1,6 +1,7 @@
-package brandname.smpp_protocol.model.smpp_base_model.pdu_concrete_model.pdu_for_communication;
+package brandname.smpp_protocol.model.smpp_base_model.pdu_concrete_model.pdu_for_communication.receiver;
 
 import brandname.smpp_protocol.model.smpp_base_model.Response;
+import brandname.smpp_protocol.model.smpp_base_model.pdu_concrete_model.pdu_for_communication.BindRequest;
 import brandname.smpp_protocol.model.util.Constants;
 
 public class BindReceiver extends BindRequest {

@@ -6,11 +6,13 @@ import brandname.smpp_protocol.model.smpp_base_model.Response;
 
 import java.io.UnsupportedEncodingException;
 
+import static brandname.smpp_protocol.model.util.Constants.CommandId.ENQUIRE_LINK_RESP;
+
 public class EnquireLinkResponse extends Response {
 
 
-    public EnquireLinkResponse(int commandId) {
-        super(commandId);
+    public EnquireLinkResponse() {
+        super(ENQUIRE_LINK_RESP);
     }
 
     @Override

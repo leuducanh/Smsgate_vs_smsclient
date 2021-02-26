@@ -7,10 +7,13 @@ import brandname.smpp_protocol.model.smpp_base_model.Response;
 
 import java.io.UnsupportedEncodingException;
 
+import static brandname.smpp_protocol.model.util.Constants.CommandId.ENQUIRE_LINK;
+
 public class EnquireLinkRequest extends Request {
 
     public EnquireLinkRequest() {
-        super();
+
+        super(ENQUIRE_LINK);
     }
 
     @Override

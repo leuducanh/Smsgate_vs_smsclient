@@ -1,9 +1,9 @@
-package brandname.smpp_protocol.model.smpp_base_model.pdu_concrete_model;
+package brandname.smpp_protocol.model.smpp_base_model.pdu_concrete_model.pdu_for_communication;
 
 import brandname.smpp_protocol.exceptions.*;
 import brandname.smpp_protocol.model.ByteBuffer;
 import brandname.smpp_protocol.model.smpp_base_model.Request;
-import brandname.smpp_protocol.model.smpp_base_model.Response;
+import brandname.smpp_protocol.model.smpp_base_model.pdu_concrete_model.Address;
 import brandname.smpp_protocol.model.util.FieldValidator;
 
 import java.io.UnsupportedEncodingException;
@@ -19,6 +19,8 @@ public abstract class BindRequest extends Request {
     private int interfaceVersion = SMPP_INTERFACE;
     private Address address = new Address();
 
+    protected abstract boolean isReceiver();
+    protected abstract boolean isTransmitter();
 
     public BindRequest(int commandId) {
         super(commandId);

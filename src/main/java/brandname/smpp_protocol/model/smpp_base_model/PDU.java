@@ -114,6 +114,10 @@ public abstract class PDU extends ByteData {
             setState(VALID_HEADER_AND_BODY_AND_OPTIONAL_PARAM);
         } catch (TerminatingZeroNotFoundException | NotEnoughByteInByteBufferException e) {
             throw new InvalidPDUException(this, e);
+        } catch (ValidateException e) {
+            throw new InvalidPDUException(this, e);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
 
         if (totalByteLength - byteBuffer.length() != pduHeader.getCommandLength()) {
@@ -141,8 +145,6 @@ public abstract class PDU extends ByteData {
 
             tlv.setData(tlvByteBuffer);
         }
-
-
     }
 
     private TLV findInOptionalTLVList(short tag) {

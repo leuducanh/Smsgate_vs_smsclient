@@ -4,8 +4,8 @@ import brandname.smpp_protocol.exceptions.ValidateException;
 
 public class Validator {
 
-    public static boolean validateStringLength(String src, int min, int max){
-        if(src == null || min > src.length() || max < src.length()) {
+    protected static boolean validateLength(int length, int min, int max){
+        if( min > length || max < length) {
             return false;
         }
         return true;
