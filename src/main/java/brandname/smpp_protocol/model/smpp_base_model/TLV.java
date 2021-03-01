@@ -40,7 +40,7 @@ public abstract class TLV extends ByteData{
         return byteBuffer;
     }
 
-    public abstract void setValueFromThisByteBuffer(ByteBuffer valueWrapInByteBuffer) throws NotEnoughByteInByteBufferException;
+    public abstract void setValueFromThisByteBuffer(ByteBuffer valueWrapInByteBuffer) throws NotEnoughByteInByteBufferException, TerminatingZeroNotFoundException;
     public abstract ByteBuffer getValueWrapInByteBuffer() throws ValueNotSetException;
     public abstract int getValueLength();
 

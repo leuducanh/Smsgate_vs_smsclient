@@ -25,7 +25,7 @@ public abstract class PDU extends ByteData {
 
     private LinkedList<TLV> tLVListForUnknownTag = new LinkedList<>();
 
-    private PDUHeader pduHeader;
+    protected PDUHeader pduHeader;
 
     private boolean sequenceBeAssigned = false;
 

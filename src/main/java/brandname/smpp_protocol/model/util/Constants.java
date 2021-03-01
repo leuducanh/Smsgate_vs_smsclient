@@ -26,11 +26,13 @@ public class Constants {
         public static final int BIND_TRANSCEIVER_RESP = 0x80000009;
 
         public static final int SUBMIT_SM = 0x00000004;
+        public static final int SUBMIT_SM_RESP = 0x80000004;
     }
 
     public static class DefaultPDUField {
         public static final String DEFAULT_EMPTY_FIELD = "";
         public static int ZERO_IN_HEX = 0x00000000;
+        public static byte ZERO_IN_HEX_BYTE = 0x00000000;
         public static Object DEFAULT_NULL_FIELD = null;
     }
 
