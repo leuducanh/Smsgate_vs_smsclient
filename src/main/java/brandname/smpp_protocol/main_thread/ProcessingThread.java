@@ -94,7 +94,7 @@ public abstract class ProcessingThread implements Runnable {
 
     public void stop() {
         if(isInProcessingState()) {
-            keepProcessing = false;
+             
             while(isInProcessingState()) {
                 Thread.yield();
             }
