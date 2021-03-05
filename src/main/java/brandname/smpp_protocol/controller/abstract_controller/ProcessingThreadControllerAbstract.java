@@ -62,7 +62,7 @@ public abstract class ProcessingThreadControllerAbstract implements Runnable {
     }
 
     public boolean shutdown() {
-        boolean isStopped = setStopState();
+        boolean isStopped = setStoppingState();
         if(isStopped) {
             while(isStoppingState()) {
                 Thread.yield();
@@ -117,7 +117,7 @@ public abstract class ProcessingThreadControllerAbstract implements Runnable {
     }
 
 
-    private boolean setStopState() {
+    private boolean setStoppingState() {
         boolean changeSuccessfully = false;
         while (!changeSuccessfully) {
             if (isInitialState() || isShutDownState()) {
